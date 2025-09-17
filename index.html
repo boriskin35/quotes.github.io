@@ -90,19 +90,14 @@
         const authorElement = document.getElementById('author');
         const generateBtn = document.getElementById('generateBtn');
 
-        // URL API, который мы хотим использовать
-        const API_URL = 'https://zenquotes.io/api/random';
-
-        // URL прокси-сервиса, который будет делать запрос за нас
-        const PROXY_URL = `https://api.allorigins.win/raw?url=${encodeURIComponent(API_URL)}`;
+        const API_URL = 'https://api.quotable.io/random';
 
         async function generateQuote() {
             quoteElement.textContent = "Загружаю...";
             authorElement.textContent = "";
             
             try {
-                // Отправляем запрос к прокси, который перенаправит его к API
-                const response = await fetch(PROXY_URL);
+                const response = await fetch(API_URL);
                 
                 if (!response.ok) {
                     throw new Error(`Произошла ошибка: ${response.status}`);
@@ -110,11 +105,8 @@
                 
                 const data = await response.json();
                 
-                // Обрабатываем данные, как мы делали в прошлый раз
-                const quoteData = data[0];
-                
-                quoteElement.textContent = `"${quoteData.q}"`;
-                authorElement.textContent = `- ${quoteData.a}`;
+                quoteElement.textContent = `"${data.content}"`;
+                authorElement.textContent = `- ${data.author}`;
             } catch (error) {
                 quoteElement.textContent = "Не удалось загрузить цитату. Проверьте подключение к интернету.";
                 authorElement.textContent = "";
@@ -122,7 +114,10 @@
             }
         }
 
+        // Эта строка привязывает функцию к кнопке. Она гарантирует, что при каждом клике будет новый запрос.
         generateBtn.addEventListener('click', generateQuote);
+
+        // Мы вызываем функцию один раз, чтобы цитата была при загрузке страницы.
         generateQuote();
     </script>
 </body>
