@@ -90,35 +90,50 @@
         const authorElement = document.getElementById('author');
         const generateBtn = document.getElementById('generateBtn');
 
-        const API_URL = 'https://api.quotable.io/random';
+        let allQuotes = []; // Создаём пустой массив, в который будут загружены цитаты
 
-        async function generateQuote() {
-            quoteElement.textContent = "Загружаю...";
-            authorElement.textContent = "";
-            
+        // Функция для загрузки цитат из файла
+        async function loadQuotes() {
             try {
-                const response = await fetch(API_URL);
+                // Используем fetch() для загрузки файла quotes.json
+                const response = await fetch('quotes.json');
                 
+                // Проверяем, успешно ли загружен файл
                 if (!response.ok) {
-                    throw new Error(`Произошла ошибка: ${response.status}`);
+                    throw new Error('Не удалось загрузить файл с цитатами.');
                 }
                 
-                const data = await response.json();
+                // Преобразуем данные из JSON-файла в массив JavaScript
+                allQuotes = await response.json();
                 
-                quoteElement.textContent = `"${data.content}"`;
-                authorElement.textContent = `- ${data.author}`;
+                // После загрузки, генерируем первую цитату
+                generateQuote();
             } catch (error) {
-                quoteElement.textContent = "Не удалось загрузить цитату. Проверьте подключение к интернету.";
+                quoteElement.textContent = "Не удалось загрузить цитаты. Проверьте путь к файлу.";
                 authorElement.textContent = "";
-                console.error("Ошибка при получении цитаты:", error);
+                console.error("Ошибка при загрузке цитат:", error);
             }
         }
 
-        // Эта строка привязывает функцию к кнопке. Она гарантирует, что при каждом клике будет новый запрос.
-        generateBtn.addEventListener('click', generateQuote);
+        // Функция для генерации случайной цитаты из загруженного массива
+        function generateQuote() {
+            if (allQuotes.length === 0) {
+                quoteElement.textContent = "Цитаты не загружены.";
+                return;
+            }
 
-        // Мы вызываем функцию один раз, чтобы цитата была при загрузке страницы.
-        generateQuote();
+            const randomIndex = Math.floor(Math.random() * allQuotes.length);
+            const randomQuote = allQuotes[randomIndex];
+
+            quoteElement.textContent = `"${randomQuote.quote}"`;
+            authorElement.textContent = `- ${randomQuote.author}`;
+        }
+
+        // Запускаем загрузку цитат при старте приложения
+        loadQuotes();
+
+        // Привязываем функцию генерации к кнопке
+        generateBtn.addEventListener('click', generateQuote);
     </script>
 </body>
 </html>
