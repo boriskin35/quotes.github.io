@@ -76,65 +76,64 @@
 </head>
 <body>
     <div class="container">
-        <h1>МУДРЫЕ ВЫСКАЗЫВАНИЯ</h1>
+        <h1>МУДРЫЕ ЦИТАТЫ</h1>
         <div class="quote-box">
             <p id="quote">Нажми на кнопку, чтобы получить мудрую цитату!</p>
             <span id="author"></span>
         </div>
-        <button id="generateBtn">получить новую цитату</button>
+        <button id="generateBtn">Сгенерировать цитату</button>
     </div>
 
     <script>
-        // JavaScript-код
-        const quoteElement = document.getElementById('quote');
-        const authorElement = document.getElementById('author');
-        const generateBtn = document.getElementById('generateBtn');
+    // Здесь тебе нужно вставить URL, который ты только что скопировал
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwTv3pKaLZ8CLWt95noplDHii4jHtidGjQIKoONaWjfakxx1se9f1JFuhxUlz85nhfV/exec';
 
-        let allQuotes = []; // Создаём пустой массив, в который будут загружены цитаты
+    const quoteElement = document.getElementById('quote');
+    const authorElement = document.getElementById('author');
+    const generateBtn = document.getElementById('generateBtn');
 
-        // Функция для загрузки цитат из файла
-        async function loadQuotes() {
-            try {
-                // Используем fetch() для загрузки файла quotes.json
-                const response = await fetch('quotes.json');
-                
-                // Проверяем, успешно ли загружен файл
-                if (!response.ok) {
-                    throw new Error('Не удалось загрузить файл с цитатами.');
-                }
-                
-                // Преобразуем данные из JSON-файла в массив JavaScript
-                allQuotes = await response.json();
-                
-                // После загрузки, генерируем первую цитату
-                generateQuote();
-            } catch (error) {
-                quoteElement.textContent = "Не удалось загрузить цитаты. Проверьте путь к файлу.";
+    // Функция для генерации случайного уникального ID пользователя
+    function getUserId() {
+        let userId = localStorage.getItem('user_id');
+        if (!userId) {
+            userId = 'user_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('user_id', userId);
+        }
+        return userId;
+    }
+
+    // Функция для получения цитаты с помощью Apps Script API
+    async function fetchQuote() {
+        try {
+            const userId = getUserId();
+            const response = await fetch(`${APPS_SCRIPT_URL}?user_id=${userId}`);
+            
+            if (!response.ok) {
+                throw new Error('Не удалось получить цитату от сервера.');
+            }
+            
+            const data = await response.json();
+            
+            // Проверка на ошибку, которую мог вернуть скрипт
+            if (data.error) {
+                quoteElement.textContent = data.error;
                 authorElement.textContent = "";
-                console.error("Ошибка при загрузке цитат:", error);
+            } else {
+                quoteElement.textContent = `"${data.quote}"`;
+                authorElement.textContent = `- ${data.author}`;
             }
+        } catch (error) {
+            quoteElement.textContent = "Ошибка: не удалось загрузить цитаты.";
+            authorElement.textContent = "";
+            console.error("Ошибка при получении цитат:", error);
         }
+    }
 
-        // Функция для генерации случайной цитаты из загруженного массива
-        function generateQuote() {
-            if (allQuotes.length === 0) {
-                quoteElement.textContent = "Цитаты не загружены.";
-                return;
-            }
+    // Привязываем функцию к кнопке
+    generateBtn.addEventListener('click', fetchQuote);
 
-            const randomIndex = Math.floor(Math.random() * allQuotes.length);
-            const randomQuote = allQuotes[randomIndex];
-
-            quoteElement.textContent = `"${randomQuote.quote}"`;
-            authorElement.textContent = `- ${randomQuote.author}`;
-        }
-
-        // Запускаем загрузку цитат при старте приложения
-        loadQuotes();
-
-        // Привязываем функцию генерации к кнопке
-        generateBtn.addEventListener('click', generateQuote);
-    </script>
+    // Получаем первую цитату при загрузке страницы
+    fetchQuote();
+</script>
 </body>
 </html>
-
