@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор мудрых цитат</title>
+    <style>
+        /* Стили CSS */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            text-align: center;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 90%;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2em;
+        }
+
+        .quote-box {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #fafafa;
+        }
+
+        #quote {
+            font-size: 1.5em;
+            font-style: italic;
+            margin: 0;
+            color: #222;
+        }
+
+        #author {
+            font-size: 1em;
+            margin-top: 10px;
+            color: #555;
+        }
+
+        #generateBtn {
+            padding: 12px 24px;
+            font-size: 1.1em;
+            cursor: pointer;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        #generateBtn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Генератор мудрых цитат</h1>
+        <div class="quote-box">
+            <p id="quote">Нажми на кнопку, чтобы получить мудрую цитату!</p>
+            <span id="author"></span>
+        </div>
+        <button id="generateBtn">Сгенерировать цитату</button>
+    </div>
+
+    <script>
+        // JavaScript-код
+        const quoteElement = document.getElementById('quote');
+        const authorElement = document.getElementById('author');
+        const generateBtn = document.getElementById('generateBtn');
+
+        // URL API, который мы хотим использовать
+        const API_URL = 'https://zenquotes.io/api/random';
+
+        // URL прокси-сервиса, который будет делать запрос за нас
+        const PROXY_URL = `https://api.allorigins.win/raw?url=${encodeURIComponent(API_URL)}`;
+
+        async function generateQuote() {
+            quoteElement.textContent = "Загружаю...";
+            authorElement.textContent = "";
+            
+            try {
+                // Отправляем запрос к прокси, который перенаправит его к API
+                const response = await fetch(PROXY_URL);
+                
+                if (!response.ok) {
+                    throw new Error(`Произошла ошибка: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Обрабатываем данные, как мы делали в прошлый раз
+                const quoteData = data[0];
+                
+                quoteElement.textContent = `"${quoteData.q}"`;
+                authorElement.textContent = `- ${quoteData.a}`;
+            } catch (error) {
+                quoteElement.textContent = "Не удалось загрузить цитату. Проверьте подключение к интернету.";
+                authorElement.textContent = "";
+                console.error("Ошибка при получении цитаты:", error);
+            }
+        }
+
+        generateBtn.addEventListener('click', generateQuote);
+        generateQuote();
+    </script>
+</body>
+</html>
